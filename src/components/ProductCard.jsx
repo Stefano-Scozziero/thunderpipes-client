@@ -7,7 +7,7 @@ export default function ProductCard({ product, onAdd }) {
         <img
           src={product.img}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+          className="w-full h-full object-contain group-hover:scale-110 transition duration-500"
         />
       </div>
       <div className="p-5">
@@ -33,8 +33,8 @@ export default function ProductCard({ product, onAdd }) {
             onClick={() => onAdd(product)}
             disabled={product.stock <= 0}
             className={`px-4 py-2 rounded transition flex items-center gap-2 text-sm font-medium ${product.stock > 0
-                ? 'bg-gray-900 text-white hover:bg-red-600'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              ? 'bg-gray-900 text-white hover:bg-red-600'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
           >
             {product.stock > 0 ? (

@@ -1,4 +1,4 @@
-import { Instagram, Facebook, Mail, MapPin } from 'lucide-react';
+import { Mail, MapPin } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -31,8 +31,53 @@ export default function Footer() {
         <div>
           <h4 className="text-xl font-bold text-white mb-4">Síguenos</h4>
           <div className="flex justify-center md:justify-start gap-4">
-            <a href="#" className="hover:text-red-500 transition"><Instagram size={28} /></a>
-            <a href="#" className="hover:text-blue-500 transition"><Facebook size={28} /></a>
+            <a
+              href="https://www.instagram.com/espmotos_casilda/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-red-500 transition"
+              aria-label="Instagram"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-instagram"
+              >
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+              </svg>
+            </a>
+            <a
+              href="https://www.tiktok.com/@axellesposito"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition"
+              aria-label="TikTok"
+            >
+              {/* Custom TikTok Icon matching Lucide style */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-tiktok"
+              >
+                <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5v4a9 9 0 0 1-9-9Z" />
+              </svg>
+            </a>
           </div>
         </div>
       </div>
