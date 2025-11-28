@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
+import SEO from '../components/SEO';
+import { toast } from 'sonner';
 import axios from 'axios';
-import { Trash2, LogOut, Loader2, PlusCircle } from 'lucide-react';
+import { Trash2, LogOut, Loader2, PlusCircle, Edit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import EditProductModal from '../components/EditProductModal';
 
 // Usamos la misma URL que configuramos en Home.jsx
 const API_URL = import.meta.env.VITE_API_URL || "https://thunderpipes-server.onrender.com";
@@ -9,9 +12,10 @@ const PRODUCTS_ENDPOINT = `${API_URL}/api/products`;
 
 export default function Admin() {
     const [products, setProducts] = useState([]);
-    const [form, setForm] = useState({ name: '', price: '', img: '', desc: '' });
+    const [form, setForm] = useState({ name: '', price: '', img: '', desc: '', stock: '' });
     const [loading, setLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editingProduct, setEditingProduct] = useState(null); // Producto a editar
     const navigate = useNavigate();
 
     const fetchProducts = async () => {
@@ -21,12 +25,13 @@ export default function Admin() {
             setProducts(res.data);
         } catch (err) {
             console.error("Error al cargar productos:", err);
-            alert("Error al cargar productos del servidor.");
+
+            toast.error("Error al cargar productos del servidor.");
         } finally {
             setLoading(false);
         }
     };
-    
+
     // Cargar productos al iniciar
     useEffect(() => {
         fetchProducts();
@@ -38,41 +43,63 @@ export default function Admin() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isSubmitting) return; 
+        if (isSubmitting) return;
 
         // Validación simple para precios positivos
         if (Number(form.price) <= 0) {
-            alert("El precio debe ser un número positivo.");
+            toast.warning("El precio debe ser un número positivo.");
             return;
         }
 
         setIsSubmitting(true);
         try {
-            await axios.post(PRODUCTS_ENDPOINT, { 
+            await axios.post(PRODUCTS_ENDPOINT, {
                 ...form,
-                price: Number(form.price) // Aseguramos que el precio sea numérico
+                price: Number(form.price),
+                stock: Number(form.stock)
             });
-            alert("✅ Producto Agregado con Éxito!");
-            setForm({ name: '', price: '', img: '', desc: '' }); // Limpiar formulario
+            toast.success("✅ Producto Agregado con Éxito!");
+            setForm({ name: '', price: '', img: '', desc: '', stock: '' }); // Limpiar formulario
             fetchProducts(); // Recargar lista
         } catch (error) {
             console.error("Error al crear producto:", error);
-            alert("❌ Error al cargar producto. Revisa la consola y la conexión al servidor.");
+            toast.error("❌ Error al cargar producto. Revisa la consola y la conexión al servidor.");
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleDelete = async (id, name) => {
-        if(!confirm(`¿Seguro que quieres borrar el producto: ${name}? Esta acción es irreversible.`)) return;
-        try {
-            await axios.delete(`${PRODUCTS_ENDPOINT}/${id}`);
-            alert(`Producto ${name} eliminado.`);
-            fetchProducts();
-        } catch (error) {
-            console.error("Error al eliminar producto:", error);
-            alert("❌ Error al eliminar el producto.");
-        }
+    const handleDelete = (id, name) => {
+        toast.custom((t) => (
+            <div className="bg-white p-6 rounded-lg shadow-xl border border-gray-200 max-w-md w-full">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">¿Eliminar {name}?</h3>
+                <p className="text-gray-600 mb-4">Esta acción no se puede deshacer.</p>
+                <div className="flex justify-end gap-3">
+                    <button
+                        onClick={() => toast.dismiss(t)}
+                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md font-medium transition"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        onClick={async () => {
+                            toast.dismiss(t);
+                            try {
+                                await axios.delete(`${PRODUCTS_ENDPOINT}/${id}`);
+                                toast.success(`Producto eliminado.`);
+                                fetchProducts();
+                            } catch (error) {
+                                console.error("Error al eliminar:", error);
+                                toast.error("Error al eliminar.");
+                            }
+                        }}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md font-medium hover:bg-red-700 transition"
+                    >
+                        Sí, eliminar
+                    </button>
+                </div>
+            </div>
+        ), { duration: Infinity });
     };
 
     const handleLogout = () => {
@@ -82,61 +109,72 @@ export default function Admin() {
 
     return (
         <div className="min-h-screen bg-gray-100 p-6 md:p-10">
+            <SEO title="Admin Panel" noindex={true} />
             <header className="flex justify-between items-center mb-10">
                 <h1 className="text-4xl font-extrabold text-gray-900 tracking-tighter border-l-4 border-red-600 pl-4">
                     Panel de Administración
                 </h1>
-                <button 
+                <button
                     onClick={handleLogout}
                     className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition shadow-md"
                 >
                     <LogOut size={20} /> Cerrar Sesión
                 </button>
             </header>
-            
+
             {/* Formulario de Carga */}
             <div className="bg-white p-8 rounded-xl shadow-lg mb-12 border-t-4 border-green-500">
                 <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-green-700">
                     <PlusCircle size={24} /> Cargar Nuevo Producto
                 </h2>
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <input 
-                        className="border p-3 w-full rounded focus:ring-red-500 focus:border-red-500 transition" 
-                        placeholder="Nombre (ej: Akrapovic)" 
+                    <input
+                        className="border p-3 w-full rounded focus:ring-red-500 focus:border-red-500 transition"
+                        placeholder="Nombre (ej: Akrapovic)"
                         name="name"
-                        value={form.name} 
-                        onChange={handleInputChange} 
-                        required 
+                        value={form.name}
+                        onChange={handleInputChange}
+                        required
                     />
-                    <input 
-                        className="border p-3 w-full rounded focus:ring-red-500 focus:border-red-500 transition" 
-                        type="number" 
-                        placeholder="Precio (solo números)" 
+                    <input
+                        className="border p-3 w-full rounded focus:ring-red-500 focus:border-red-500 transition"
+                        type="number"
+                        placeholder="Precio (solo números)"
                         name="price"
-                        value={form.price} 
-                        onChange={handleInputChange} 
-                        required 
+                        value={form.price}
+                        onChange={handleInputChange}
+                        required
                         min="1"
                     />
-                    <input 
-                        className="border p-3 w-full rounded focus:ring-red-500 focus:border-red-500 transition col-span-1 md:col-span-2" 
-                        placeholder="URL de Imagen (http://...)" 
-                        name="img"
-                        value={form.img} 
-                        onChange={handleInputChange} 
-                        required 
+                    <input
+                        className="border p-3 w-full rounded focus:ring-red-500 focus:border-red-500 transition"
+                        type="number"
+                        placeholder="Stock disponible"
+                        name="stock"
+                        value={form.stock}
+                        onChange={handleInputChange}
+                        required
+                        min="0"
                     />
-                    <textarea 
-                        className="border p-3 w-full rounded focus:ring-red-500 focus:border-red-500 transition col-span-1 md:col-span-2 resize-none" 
-                        placeholder="Descripción detallada del escape..." 
+                    <input
+                        className="border p-3 w-full rounded focus:ring-red-500 focus:border-red-500 transition col-span-1 md:col-span-2"
+                        placeholder="URL de Imagen (http://...)"
+                        name="img"
+                        value={form.img}
+                        onChange={handleInputChange}
+                        required
+                    />
+                    <textarea
+                        className="border p-3 w-full rounded focus:ring-red-500 focus:border-red-500 transition col-span-1 md:col-span-2 resize-none"
+                        placeholder="Descripción detallada del escape..."
                         name="desc"
-                        value={form.desc} 
-                        onChange={handleInputChange} 
-                        required 
+                        value={form.desc}
+                        onChange={handleInputChange}
+                        required
                         rows="3"
                     />
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         disabled={isSubmitting}
                         className="col-span-1 md:col-span-2 bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
                     >
@@ -154,7 +192,7 @@ export default function Admin() {
             {/* Inventario Actual */}
             <div className="bg-white p-8 rounded-xl shadow-lg">
                 <h2 className="text-2xl font-bold mb-6 text-gray-800">Inventario Actual ({products.length})</h2>
-                
+
                 {loading ? (
                     <div className="text-center py-10 text-gray-500">
                         <Loader2 size={32} className="animate-spin mx-auto mb-3" />
@@ -170,6 +208,7 @@ export default function Admin() {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID (Referencia)</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                                 </tr>
                             </thead>
@@ -179,18 +218,31 @@ export default function Admin() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-[100px]">{p._id}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             <div className="flex items-center">
-                                                <img src={p.img} alt={p.name} className="h-10 w-10 rounded-full mr-4 object-cover border" onError={(e) => e.target.style.display='none'} />
+                                                <img src={p.img} alt={p.name} className="h-10 w-10 rounded-full mr-4 object-cover border" onError={(e) => e.target.style.display = 'none'} />
                                                 {p.name}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-bold">${p.price.toLocaleString()}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${p.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                {p.stock !== undefined ? p.stock : 'N/A'}
+                                            </span>
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                            <button 
-                                                onClick={() => handleDelete(p._id, p.name)} 
-                                                className="text-red-600 hover:text-red-900 transition flex items-center gap-1 font-semibold"
-                                            >
-                                                <Trash2 size={16} /> Eliminar
-                                            </button>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => setEditingProduct(p)}
+                                                    className="text-blue-600 hover:text-blue-900 transition flex items-center gap-1 font-semibold"
+                                                >
+                                                    <Edit size={16} /> Editar
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(p._id, p.name)}
+                                                    className="text-red-600 hover:text-red-900 transition flex items-center gap-1 font-semibold"
+                                                >
+                                                    <Trash2 size={16} /> Eliminar
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -199,6 +251,16 @@ export default function Admin() {
                     </div>
                 )}
             </div>
+
+            {/* Modal de Edición */}
+            <EditProductModal
+                product={editingProduct}
+                isOpen={!!editingProduct}
+                onClose={() => setEditingProduct(null)}
+                onUpdate={(updatedProduct) => {
+                    setProducts(products.map(p => p._id === updatedProduct._id ? updatedProduct : p));
+                }}
+            />
         </div>
     );
 }

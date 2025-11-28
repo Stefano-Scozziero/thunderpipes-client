@@ -2,7 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
 import Login from './pages/Login'; // Lo crearemos pronto
+import NotFound from './pages/NotFound';
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 
 // Componente para proteger rutas (Guardian)
 const ProtectedRoute = ({ children }) => {
@@ -18,7 +20,7 @@ function App() {
     setCart(prevCart => {
       const existing = prevCart.find(item => item._id === product._id);
       if (existing) {
-        return prevCart.map(item => 
+        return prevCart.map(item =>
           item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
@@ -47,14 +49,14 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={
-          <Home 
-            cart={cart} 
-            addToCart={addToCart} 
-            removeFromCart={removeFromCart} 
-            updateQuantity={updateQuantity} 
+          <Home
+            cart={cart}
+            addToCart={addToCart}
+            removeFromCart={removeFromCart}
+            updateQuantity={updateQuantity}
           />
         } />
-        
+
         {/* Ruta de Login Pública */}
         <Route path="/login" element={<Login />} />
 
@@ -64,6 +66,9 @@ function App() {
             <Admin />
           </ProtectedRoute>
         } />
+
+        {/* Ruta 404 */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

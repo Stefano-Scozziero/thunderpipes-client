@@ -5,7 +5,7 @@ export default function Navbar({ cartCount, toggleCart }) {
   return (
     <nav className="bg-gray-900 text-white p-4 sticky top-0 z-50 flex justify-between items-center shadow-lg">
       <Link to="/" className="text-2xl font-bold tracking-tighter text-red-500">
-        THUNDER<span className="text-white">PIPES</span>
+        ESP<span className="text-black">PERFORMANCE</span>
       </Link>
       
       <div className="flex gap-4 items-center">
