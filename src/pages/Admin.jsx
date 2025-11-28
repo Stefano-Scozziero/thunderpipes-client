@@ -21,7 +21,7 @@ export default function Admin() {
     const fetchProducts = async () => {
         setLoading(true);
         try {
-            const res = await axios.get(PRODUCTS_ENDPOINT);
+            const res = await axios.get(PRODUCTS_ENDPOINT, { withCredentials: true });
             setProducts(res.data);
         } catch (err) {
             console.error("Error al cargar productos:", err);
@@ -57,7 +57,7 @@ export default function Admin() {
                 ...form,
                 price: Number(form.price),
                 stock: Number(form.stock)
-            });
+            }, { withCredentials: true });
             toast.success("✅ Producto Agregado con Éxito!");
             setForm({ name: '', price: '', img: '', desc: '', stock: '' }); // Limpiar formulario
             fetchProducts(); // Recargar lista
@@ -85,7 +85,7 @@ export default function Admin() {
                         onClick={async () => {
                             toast.dismiss(t);
                             try {
-                                await axios.delete(`${PRODUCTS_ENDPOINT}/${id}`);
+                                await axios.delete(`${PRODUCTS_ENDPOINT}/${id}`, { withCredentials: true });
                                 toast.success(`Producto eliminado.`);
                                 fetchProducts();
                             } catch (error) {
@@ -102,9 +102,13 @@ export default function Admin() {
         ), { duration: Infinity });
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('adminAuth'); // Elimina la llave de autenticación
-        navigate('/'); // Redirige al Home
+    const handleLogout = async () => {
+        try {
+            await axios.post(`${API_URL}/api/auth/logout`, {}, { withCredentials: true });
+            navigate('/');
+        } catch (error) {
+            console.error("Error al cerrar sesión", error);
+        }
     };
 
     return (

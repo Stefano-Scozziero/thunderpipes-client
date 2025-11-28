@@ -3,13 +3,30 @@ import Home from './pages/Home';
 import Admin from './pages/Admin';
 import Login from './pages/Login'; // Lo crearemos pronto
 import NotFound from './pages/NotFound';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || "https://thunderpipes-server.onrender.com";
 
 // Componente para proteger rutas (Guardian)
 const ProtectedRoute = ({ children }) => {
-  const isAuth = localStorage.getItem('adminAuth'); // Chequeamos si está logueado
-  return isAuth === 'true' ? children : <Navigate to="/login" />;
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await axios.get(`${API_URL}/api/auth/check`, { withCredentials: true });
+        setIsAuthenticated(true);
+      } catch (error) {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  if (isAuthenticated === null) return <div>Cargando...</div>; // O un spinner
+  return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
 function App() {

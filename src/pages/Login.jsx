@@ -2,20 +2,31 @@ import { useState } from 'react';
 import SEO from '../components/SEO';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || "https://thunderpipes-server.onrender.com";
 
 export default function Login() {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // CONTRASEÑA MAESTRA: Cámbiala por lo que quieras
-    const masterPassword = import.meta.env.VITE_PASS_MASTER;
-    if (password === masterPassword) {
-      localStorage.setItem('adminAuth', 'true');
-      navigate('/admin');
-    } else {
-      toast.error("Contraseña incorrecta. Acceso denegado.");
+    try {
+      // Usamos withCredentials para que el navegador guarde la cookie
+      await axios.post(`${API_URL}/api/auth/login`,
+        { username, password },
+        { withCredentials: true }
+      );
+
+      toast.success("Bienvenido al Garage");
+      // Forzamos recarga o actualizamos estado global (aquí simplificamos redirigiendo)
+      // En App.jsx verificaremos la cookie/token
+      window.location.href = '/admin';
+    } catch (error) {
+      console.error(error);
+      toast.error("Credenciales incorrectas.");
     }
   };
 
@@ -26,7 +37,17 @@ export default function Login() {
         <h2 className="text-3xl font-bold text-center mb-6 text-red-600">Acceso Admin</h2>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-gray-700 font-bold mb-2">Contraseña Maestra</label>
+            <label className="block text-gray-700 font-bold mb-2">Usuario</label>
+            <input
+              type="text"
+              className="w-full border border-gray-300 p-3 rounded focus:outline-none focus:border-red-500"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="admin"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold mb-2">Contraseña</label>
             <input
               type="password"
               className="w-full border border-gray-300 p-3 rounded focus:outline-none focus:border-red-500"
