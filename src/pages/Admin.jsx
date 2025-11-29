@@ -69,37 +69,16 @@ export default function Admin() {
         }
     };
 
-    const handleDelete = (id, name) => {
-        toast.custom((t) => (
-            <div className="bg-white p-6 rounded-lg shadow-xl border border-gray-200 max-w-md w-full">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">¿Eliminar {name}?</h3>
-                <p className="text-gray-600 mb-4">Esta acción no se puede deshacer.</p>
-                <div className="flex justify-end gap-3">
-                    <button
-                        onClick={() => toast.dismiss(t)}
-                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md font-medium transition"
-                    >
-                        Cancelar
-                    </button>
-                    <button
-                        onClick={async () => {
-                            toast.dismiss(t);
-                            try {
-                                await axios.delete(`${PRODUCTS_ENDPOINT}/${id}`, { withCredentials: true });
-                                toast.success(`Producto eliminado.`);
-                                fetchProducts();
-                            } catch (error) {
-                                console.error("Error al eliminar:", error);
-                                toast.error("Error al eliminar.");
-                            }
-                        }}
-                        className="px-4 py-2 bg-red-600 text-white rounded-md font-medium hover:bg-red-700 transition"
-                    >
-                        Sí, eliminar
-                    </button>
-                </div>
-            </div>
-        ), { duration: Infinity });
+    const handleDelete = async (id, name) => {
+        if (window.confirm(`¿Estás seguro de que deseas eliminar ${name}?`)) {
+            try {
+                await axios.delete(`${PRODUCTS_ENDPOINT}/${id}`, { withCredentials: true });
+                toast.success(`Producto eliminado.`);
+                fetchProducts();
+            } catch (error) {
+                toast.error("Error al eliminar.");
+            }
+        }
     };
 
     const handleLogout = async () => {
