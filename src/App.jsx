@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
-import Login from './pages/Login'; // Lo crearemos pronto
+import Login from './pages/Login';
 import NotFound from './pages/NotFound';
+import ProductDetail from './pages/ProductDetail';
 import { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || "https://thunderpipes-server.onrender.com";
@@ -70,6 +70,16 @@ function App() {
       <Routes>
         <Route path="/" element={
           <Home
+            cart={cart}
+            addToCart={addToCart}
+            removeFromCart={removeFromCart}
+            updateQuantity={updateQuantity}
+          />
+        } />
+
+        {/* Nueva Ruta de Detalle de Producto */}
+        <Route path="/product/:id" element={
+          <ProductDetail
             cart={cart}
             addToCart={addToCart}
             removeFromCart={removeFromCart}

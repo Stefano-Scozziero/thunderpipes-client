@@ -1,47 +1,21 @@
-import { useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 
 export default function SEO({ title, description, keywords, noindex }) {
-    useEffect(() => {
-        // Update Title
-        document.title = `${title} | ESP Performance`;
+    const siteTitle = "ESP Performance";
+    const fullTitle = `${title} | ${siteTitle}`;
 
-        // Update Meta Tags
-        const metaDescription = document.querySelector('meta[name="description"]');
-        if (metaDescription) {
-            if (description) metaDescription.setAttribute('content', description);
-        } else if (description) {
-            const meta = document.createElement('meta');
-            meta.name = 'description';
-            meta.content = description;
-            document.head.appendChild(meta);
-        }
+    return (
+        <Helmet>
+            <title>{fullTitle}</title>
+            {description && <meta name="description" content={description} />}
+            {keywords && <meta name="keywords" content={keywords} />}
+            {noindex && <meta name="robots" content="noindex" />}
 
-        const metaKeywords = document.querySelector('meta[name="keywords"]');
-        if (metaKeywords) {
-            if (keywords) metaKeywords.setAttribute('content', keywords);
-        } else if (keywords) {
-            const meta = document.createElement('meta');
-            meta.name = 'keywords';
-            meta.content = keywords;
-            document.head.appendChild(meta);
-        }
-
-        const metaRobots = document.querySelector('meta[name="robots"]');
-        if (metaRobots) {
-            if (noindex) metaRobots.setAttribute('content', 'noindex');
-            else metaRobots.removeAttribute('content'); // Or set to 'index, follow'
-        } else if (noindex) {
-            const meta = document.createElement('meta');
-            meta.name = 'robots';
-            meta.content = 'noindex';
-            document.head.appendChild(meta);
-        }
-
-        // Cleanup function to reset (optional, but good practice)
-        return () => {
-            // We could reset to default here if needed
-        };
-    }, [title, description, keywords, noindex]);
-
-    return null;
+            {/* Open Graph / Facebook */}
+            <meta property="og:type" content="website" />
+            <meta property="og:title" content={fullTitle} />
+            {description && <meta property="og:description" content={description} />}
+            <meta property="og:site_name" content={siteTitle} />
+        </Helmet>
+    );
 }

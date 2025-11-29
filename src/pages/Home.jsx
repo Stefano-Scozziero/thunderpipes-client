@@ -36,40 +36,51 @@ export default function Home({ cart, addToCart, removeFromCart, updateQuantity }
 
       <Navbar cartCount={cart.reduce((acc, item) => acc + item.quantity, 0)} toggleCart={() => setIsCartOpen(!isCartOpen)} />
 
-      {/* Hero */}
-      <header className="bg-gray-800 text-white py-24 text-center px-4 relative">
-        <div className="absolute inset-0 bg-black opacity-50"></div>
-        <div className="relative z-10 max-w-2xl mx-auto">
-          <h2 className="text-5xl md:text-7xl font-extrabold uppercase mb-4 tracking-tight">Libera el <span className="text-red-600">sonido</span></h2>
-          <p className="text-xl text-gray-300 mb-8">Fabricación artesanal, materiales premium y rendimiento puro.</p>
-          <a href="#catalogo" className="bg-red-600 text-white px-8 py-3 rounded-full font-bold hover:bg-red-700 transition">Ver Escapes</a>
+      {/* Hero Premium */}
+      <header className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-black">
+        {/* Background Overlay */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-90 z-10"></div>
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-50 grayscale hover:grayscale-0 transition-all duration-1000 transform hover:scale-105"></div>
+        </div>
+
+        <div className="relative z-20 text-center px-4 max-w-4xl mx-auto">
+          <span className="text-red-600 font-bold tracking-[0.2em] uppercase text-sm md:text-base mb-4 block animate-fade-in-up">
+            Handcrafted Performance
+          </span>
+          <h1 className="text-6xl md:text-8xl font-black text-white mb-6 uppercase tracking-tighter leading-none animate-fade-in-up delay-100">
+            Libera la <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-900">Bestia</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-300 mb-10 font-light max-w-2xl mx-auto animate-fade-in-up delay-200">
+            Sistemas de escape de alto rendimiento diseñados para quienes no se conforman con el silencio.
+          </p>
+          <div className="flex flex-col md:flex-row gap-4 justify-center animate-fade-in-up delay-300">
+            <a href="#catalogo" className="bg-red-600 text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-red-700 transition transform hover:-translate-y-1 shadow-lg shadow-red-900/50">
+              Ver Colección
+            </a>
+            <a href="#features" className="border border-white/30 text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-white/10 transition backdrop-blur-sm">
+              Descubrir Más
+            </a>
+          </div>
         </div>
       </header>
 
       {/* Sección de Características (Feature Section) */}
-      <section className="bg-white py-16 px-4">
-        <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          <div className="p-6">
-            <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
-              <Zap size={32} />
+      <section id="features" className="bg-zinc-900 py-24 px-4 relative overflow-hidden">
+        <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center relative z-10">
+          {[
+            { icon: Zap, title: "Potencia Pura", desc: "Optimización de flujo para ganar HP reales." },
+            { icon: Wrench, title: "Instalación Directa", desc: "Sistema Slip-On sin modificaciones permanentes." },
+            { icon: ShieldCheck, title: "Garantía de por Vida", desc: "Confianza total en nuestra soldadura TIG." }
+          ].map((feature, idx) => (
+            <div key={idx} className="p-8 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 hover:border-red-600/50 transition duration-300 group">
+              <div className="bg-zinc-900 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-red-600 group-hover:scale-110 transition duration-300 shadow-lg shadow-black/50">
+                <feature.icon size={40} strokeWidth={1.5} />
+              </div>
+              <h3 className="text-2xl font-bold mb-3 text-white">{feature.title}</h3>
+              <p className="text-gray-400 leading-relaxed">{feature.desc}</p>
             </div>
-            <h3 className="text-xl font-bold mb-2">Potencia Instantánea</h3>
-            <p className="text-gray-500">Mejora el flujo de gases y gana caballos de fuerza reales en tu motor.</p>
-          </div>
-          <div className="p-6">
-            <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
-              <Wrench size={32} />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Instalación Simple</h3>
-            <p className="text-gray-500">Sistemas Slip-On diseñados para encajar perfectamente sin modificaciones.</p>
-          </div>
-          <div className="p-6">
-            <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
-              <ShieldCheck size={32} />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Garantía Total</h3>
-            <p className="text-gray-500">Todos nuestros escapes cuentan con 1 año de garantía por defectos de fábrica.</p>
-          </div>
+          ))}
         </div>
       </section>
 
