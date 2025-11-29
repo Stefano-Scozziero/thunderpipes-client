@@ -39,7 +39,7 @@ export default function CartModal({ cart, isOpen, onClose, onRemove, updateQuant
             cart.map((item) => (
               <div key={item._id} className="flex gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
                 {/* Imagen Miniatura */}
-                <img src={item.img} alt={item.name} className="w-16 h-16 object-cover rounded" />
+                <img src={item.img} alt={item.name} className="w-16 h-16 object-contain rounded" />
 
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
