@@ -41,7 +41,7 @@ export default function EditProductModal({ product, isOpen, onClose, onUpdate })
                 ...form,
                 price: Number(form.price),
                 stock: Number(form.stock)
-            });
+            }, { withCredentials: true });
             toast.success("Producto actualizado correctamente");
             onUpdate(res.data);
             onClose();
