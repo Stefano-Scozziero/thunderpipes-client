@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import SEO from '../components/SEO';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import CartModal from '../components/CartModal';
-import Footer from '../components/Footer'; // Importamos el footer
-import { Wrench, Zap, ShieldCheck } from 'lucide-react'; // Iconos para sección features
+import Footer from '../components/Footer';
+import { Wrench, Zap, ShieldCheck } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 const API_URL = import.meta.env.VITE_API_URL || "https://thunderpipes-server.onrender.com";
 
-export default function Home({ cart, addToCart, removeFromCart, updateQuantity }) {
+export default function Home() {
+  const { cart, addToCart, removeFromCart, updateQuantity, cartCount } = useCart();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -34,10 +37,15 @@ export default function Home({ cart, addToCart, removeFromCart, updateQuantity }
         keywords="escapes, motos, performance, slip-on, argentina, artesanal"
       />
 
-      <Navbar cartCount={cart.reduce((acc, item) => acc + item.quantity, 0)} toggleCart={() => setIsCartOpen(!isCartOpen)} />
+      <Navbar cartCount={cartCount} toggleCart={() => setIsCartOpen(!isCartOpen)} />
 
       {/* Hero Premium */}
-      <header className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-black">
+      <motion.header
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-black"
+      >
         {/* Background Overlay */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-90 z-10"></div>
@@ -60,57 +68,64 @@ export default function Home({ cart, addToCart, removeFromCart, updateQuantity }
               Ver Colección
             </a>
             <a href="#features" className="border border-white/30 text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-white/10 transition backdrop-blur-sm">
-              Descubrir Más
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="mt-8 font-bold text-red-500 tracking-widest text-lg"
+              >
+                ESCAPES RR
+              </motion.div>
             </a>
           </div>
         </div>
-      </header>
+      </motion.header>
 
-      {/* Sección de Características (Feature Section) */}
-      <section id="features" className="bg-zinc-900 py-24 px-4 relative overflow-hidden">
-        <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center relative z-10">
-          {[
-            { icon: Zap, title: "Potencia Pura", desc: "Optimización de flujo para ganar HP reales." },
-            { icon: Wrench, title: "Instalación Directa", desc: "Sistema Slip-On sin modificaciones permanentes." },
-            { icon: ShieldCheck, title: "Garantía de por Vida", desc: "Confianza total en nuestra soldadura TIG." }
-          ].map((feature, idx) => (
-            <div key={idx} className="p-8 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 hover:border-red-600/50 transition duration-300 group">
-              <div className="bg-zinc-900 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-red-600 group-hover:scale-110 transition duration-300 shadow-lg shadow-black/50">
-                <feature.icon size={40} strokeWidth={1.5} />
-              </div>
-              <h3 className="text-2xl font-bold mb-3 text-white">{feature.title}</h3>
-              <p className="text-gray-400 leading-relaxed">{feature.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Catálogo */}
-      <main id="catalogo" className="container mx-auto py-16 px-4 flex-grow">
-        <h3 className="text-3xl font-bold mb-10 text-center uppercase tracking-wide">Nuestra Colección</h3>
+      {/* Products Grid */}
+      <main className="container mx-auto px-4 py-12 flex-grow">
+        <motion.h2
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          className="text-3xl font-bold mb-8 border-l-4 border-red-600 pl-4"
+        >
+          Nuestros Productos
+        </motion.h2>
 
         {loading ? (
-          <div className="text-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[...Array(6)].map((_, i) => (
+              <ProductCard key={i} loading={true} />
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {products.map((prod) => (
-              <ProductCard key={prod._id} product={prod} onAdd={addToCart} />
+            {products.map((product, index) => (
+              <motion.div
+                key={product._id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <ProductCard product={product} />
+              </motion.div>
             ))}
           </div>
         )}
       </main>
 
-      <Footer />
+
 
       <CartModal
-        cart={cart}
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
+        cart={cart}
+        updateQuantity={updateQuantity}
         onRemove={removeFromCart}
-        updateQuantity={updateQuantity} // Pasamos la nueva función
       />
-    </div>
+
+      <Footer />
+    </div >
   );
 }

@@ -1,25 +1,21 @@
 import axios from 'axios';
 import { Minus, Plus, Trash2 } from 'lucide-react'; // Nuevos iconos
+import { useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL || "https://thunderpipes-server.onrender.com";
 
 export default function CartModal({ cart, isOpen, onClose, onRemove, updateQuantity }) {
+  const navigate = useNavigate();
+
   if (!isOpen) return null;
 
   // Calculamos total considerando cantidades
   const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (cart.length === 0) return alert("Carrito vacío");
-
-    try {
-      const response = await axios.post(`${API_URL}/create_preference`, { items: cart });
-      const { id } = response.data;
-      window.location.href = `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${id}`;
-    } catch (error) {
-      alert("Error de conexión");
-      console.error(error);
-    }
+    onClose();
+    navigate('/checkout');
   };
 
   return (
@@ -81,7 +77,7 @@ export default function CartModal({ cart, isOpen, onClose, onRemove, updateQuant
             onClick={handleCheckout}
             className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-lg shadow-lg transition uppercase tracking-wide"
           >
-            Pagar con Mercado Pago
+            Iniciar Compra
           </button>
         </div>
       </div>

@@ -2,105 +2,71 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 import ProductDetail from './pages/ProductDetail';
+import Checkout from './pages/Checkout';
+import Success from './pages/Success';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { CartProvider } from './context/CartContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+
 
 const API_URL = import.meta.env.VITE_API_URL || "https://thunderpipes-server.onrender.com";
 
 // Componente para proteger rutas (Guardian)
-const ProtectedRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
+const ProtectedRoute = ({ children, role }) => {
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        console.log("Checking auth...");
-        await axios.get(`${API_URL}/api/auth/check`, { withCredentials: true });
-        console.log("Auth check passed");
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.log("Auth check failed", error);
-        setIsAuthenticated(false);
-      }
-    };
-    checkAuth();
-  }, []);
+  if (loading) return <div>Cargando...</div>;
 
-  if (isAuthenticated === null) return <div>Cargando...</div>; // O un spinner
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  if (!user) return <Navigate to="/login" />;
+
+  if (role && user.role !== role) return <Navigate to="/" />;
+
+  return children;
 };
 
 function App() {
-  const [cart, setCart] = useState([]);
-
-  // Lógica inteligente: Si existe, suma 1. Si no, lo agrega.
-  const addToCart = (product) => {
-    setCart(prevCart => {
-      const existing = prevCart.find(item => item._id === product._id);
-      if (existing) {
-        return prevCart.map(item =>
-          item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prevCart, { ...product, quantity: 1 }];
-    });
-  };
-
-  // Función para aumentar/disminuir cantidad desde el modal
-  const updateQuantity = (id, amount) => {
-    setCart(prevCart => {
-      return prevCart.map(item => {
-        if (item._id === id) {
-          const newQuantity = Math.max(1, item.quantity + amount); // Mínimo 1
-          return { ...item, quantity: newQuantity };
-        }
-        return item;
-      });
-    });
-  };
-
-  const removeFromCart = (id) => {
-    setCart(prevCart => prevCart.filter(item => item._id !== id));
-  };
-
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={
-          <Home
-            cart={cart}
-            addToCart={addToCart}
-            removeFromCart={removeFromCart}
-            updateQuantity={updateQuantity}
-          />
-        } />
+    <AuthProvider>
+      <CartProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
 
-        {/* Nueva Ruta de Detalle de Producto */}
-        <Route path="/product/:id" element={
-          <ProductDetail
-            cart={cart}
-            addToCart={addToCart}
-            removeFromCart={removeFromCart}
-            updateQuantity={updateQuantity}
-          />
-        } />
+            {/* Nueva Ruta de Detalle de Producto */}
+            <Route path="/product/:id" element={<ProductDetail />} />
 
-        {/* Ruta de Login Pública */}
-        <Route path="/login" element={<Login />} />
+            {/* Ruta de Checkout */}
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/success" element={<Success />} />
 
-        {/* Ruta Protegida: Solo pasa si sabe la contraseña */}
-        <Route path="/admin" element={
-          <ProtectedRoute>
-            <Admin />
-          </ProtectedRoute>
-        } />
+            {/* Ruta de Login Pública */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-        {/* Ruta 404 */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+
+            {/* Ruta Protegida: Solo pasa si sabe la contraseña */}
+            <Route path="/admin" element={
+              <ProtectedRoute role="admin">
+                <Admin />
+              </ProtectedRoute>
+            } />
+
+            {/* Ruta 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 

@@ -1,76 +1,59 @@
-import { Plus, Heart } from 'lucide-react';
-import { useState } from 'react';
-import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { motion } from 'framer-motion';
 
-export default function ProductCard({ product, onAdd }) {
-  const [isWishlisted, setIsWishlisted] = useState(false); // Placeholder state
+export default function ProductCard({ product, loading }) {
+  const { addToCart } = useCart();
 
-  const toggleWishlist = (e) => {
-    e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
-    toast.success(isWishlisted ? "Eliminado de favoritos" : "Agregado a favoritos");
-    // TODO: Connect to backend
-  };
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
+        <div className="h-48 bg-gray-200"></div>
+        <div className="p-5 space-y-3">
+          <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded w-full"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+        <div className="px-5 pb-5 flex justify-between items-center">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-10 bg-gray-200 rounded w-1/3"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition group relative">
-      <button
-        onClick={toggleWishlist}
-        className="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/80 hover:bg-white text-gray-400 hover:text-red-500 transition shadow-sm"
-      >
-        <Heart size={20} fill={isWishlisted ? "currentColor" : "none"} className={isWishlisted ? "text-red-500" : ""} />
-      </button>
-
-      <Link to={`/product/${product._id}`} className="block">
+    <motion.div
+      whileHover={{ y: -10, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+      className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 border border-gray-100"
+    >
+      <Link to={`/product/${product._id}`}>
         <div className="h-48 overflow-hidden">
-          <img
+          <motion.img
+            whileHover={{ scale: 1.1 }}
+            transition={{ duration: 0.5 }}
             src={product.img}
             alt={product.name}
-            loading="lazy"
-            decoding="async"
-            className="w-full h-full object-contain group-hover:scale-110 transition duration-500"
+            className="w-full h-full object-cover"
           />
         </div>
-        <div className="p-5">
-          <h4 className="font-bold text-lg hover:text-red-600 transition">{product.name}</h4>
-          <p className="text-sm text-gray-500 mb-4 truncate">{product.desc}</p>
-        </div>
       </Link>
-
-      <div className="px-5 pb-5 flex justify-between items-center">
-        <div className="flex flex-col">
-          <span className="text-xl font-bold text-gray-900">
-            ${product.price.toLocaleString()}
-          </span>
-          {product.stock > 0 && product.stock < 5 && (
-            <span className="text-xs text-orange-600 font-bold animate-pulse">
-              ¡Últimas {product.stock} unidades!
-            </span>
-          )}
-          {product.stock === 0 && (
-            <span className="text-xs text-red-600 font-bold">
-              Sin Stock
-            </span>
-          )}
+      <div className="p-5">
+        <Link to={`/product/${product._id}`}>
+          <h3 className="text-xl font-bold mb-2 hover:text-red-600 transition">{product.name}</h3>
+        </Link>
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{product.desc}</p>
+        <div className="flex justify-between items-center">
+          <span className="text-2xl font-bold text-gray-900">${product.price.toLocaleString()}</span>
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => addToCart(product)}
+            className="bg-black text-white px-4 py-2 rounded hover:bg-red-600 transition font-bold text-sm"
+          >
+            Agregar
+          </motion.button>
         </div>
-        <button
-          onClick={() => onAdd(product)}
-          disabled={product.stock <= 0}
-          className={`px-4 py-2 rounded transition flex items-center gap-2 text-sm font-medium ${product.stock > 0
-            ? 'bg-gray-900 text-white hover:bg-red-600'
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
-        >
-          {product.stock > 0 ? (
-            <>
-              <Plus size={16} /> Agregar
-            </>
-          ) : (
-            "Agotado"
-          )}
-        </button>
       </div>
-    </div>
+    </motion.div>
   );
 }

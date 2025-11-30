@@ -5,4 +5,8 @@ import viteCompression from 'vite-plugin-compression';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), viteCompression()],
+  test: {
+    environment: 'jsdom',
+    globals: true
+  }
 })

@@ -7,10 +7,13 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ReviewList from '../components/ReviewList';
 import SEO from '../components/SEO';
+import { useCart } from '../context/CartContext';
+import CartModal from '../components/CartModal';
 
 const API_URL = import.meta.env.VITE_API_URL || "https://thunderpipes-server.onrender.com";
 
-export default function ProductDetail({ cart, addToCart, removeFromCart, updateQuantity }) {
+export default function ProductDetail() {
+    const { addToCart, cartCount, cart, updateQuantity, removeFromCart } = useCart();
     const { id } = useParams();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -40,7 +43,7 @@ export default function ProductDetail({ cart, addToCart, removeFromCart, updateQ
     return (
         <div className="min-h-screen bg-gray-50 font-sans text-gray-900 flex flex-col">
             <SEO title={product.name} description={product.desc} />
-            <Navbar cartCount={cart.reduce((acc, item) => acc + item.quantity, 0)} toggleCart={() => setIsCartOpen(!isCartOpen)} />
+            <Navbar cartCount={cartCount} toggleCart={() => setIsCartOpen(!isCartOpen)} />
 
             <main className="container mx-auto px-4 py-12 flex-grow">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -87,8 +90,8 @@ export default function ProductDetail({ cart, addToCart, removeFromCart, updateQ
                                 onClick={() => addToCart(product)}
                                 disabled={product.stock <= 0}
                                 className={`flex-1 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl transition transform hover:-translate-y-1 ${product.stock > 0
-                                        ? 'bg-black text-white hover:bg-gray-900'
-                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    ? 'bg-black text-white hover:bg-gray-900'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     }`}
                             >
                                 {product.stock > 0 ? (
@@ -106,6 +109,14 @@ export default function ProductDetail({ cart, addToCart, removeFromCart, updateQ
                     </div>
                 </div>
             </main>
+
+            <CartModal
+                isOpen={isCartOpen}
+                onClose={() => setIsCartOpen(false)}
+                cart={cart}
+                updateQuantity={updateQuantity}
+                onRemove={removeFromCart}
+            />
 
             <Footer />
         </div>

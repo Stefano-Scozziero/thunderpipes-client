@@ -1,32 +1,25 @@
 import { useState } from 'react';
 import SEO from '../components/SEO';
-import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || "https://thunderpipes-server.onrender.com";
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      // Usamos withCredentials para que el navegador guarde la cookie
-      await axios.post(`${API_URL}/api/auth/login`,
-        { username, password },
-        { withCredentials: true }
-      );
-
-      toast.success("Bienvenido al Garage");
-      // Forzamos recarga o actualizamos estado global (aquí simplificamos redirigiendo)
-      // En App.jsx verificaremos la cookie/token
-      window.location.href = '/admin';
+      const user = await login(username, password);
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     } catch (error) {
-      console.error(error);
-      toast.error("Credenciales incorrectas.");
+      // Error handled in context
     }
   };
 
@@ -60,7 +53,10 @@ export default function Login() {
             Entrar al Garage
           </button>
         </form>
+        <p className="text-center mt-4 text-gray-600">
+          ¿No tienes cuenta? <Link to="/register" className="text-red-600 font-bold">Regístrate</Link>
+        </p>
       </div>
-    </div>
+    </div >
   );
 }
