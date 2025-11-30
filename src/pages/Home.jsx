@@ -56,7 +56,6 @@ export default function Home() {
           <span className="text-red-600 font-bold tracking-[0.2em] uppercase text-sm md:text-base mb-4 block animate-fade-in-up">
             Handcrafted Performance
           </span>
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-2 animate-fade-in-up">ESCAPES RR</h2>
           <h1 className="text-6xl md:text-8xl font-black text-white mb-6 uppercase tracking-tighter leading-none animate-fade-in-up delay-100">
             Libera la <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-900">Bestia</span>
           </h1>
